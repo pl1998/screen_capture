@@ -33,7 +33,8 @@ const menuI18n = {
       resetZoom: '实际大小',
       zoomIn: '放大',
       zoomOut: '缩小',
-      toggleFullscreen: '切换全屏'
+      toggleFullscreen: '切换全屏',
+      compactMode: '简化模式'
     },
     language: {
       label: '语言',
@@ -86,7 +87,8 @@ const menuI18n = {
       resetZoom: 'Actual Size',
       zoomIn: 'Zoom In',
       zoomOut: 'Zoom Out',
-      toggleFullscreen: 'Toggle Fullscreen'
+      toggleFullscreen: 'Toggle Fullscreen',
+      compactMode: 'Compact Mode'
     },
     language: {
       label: 'Language',

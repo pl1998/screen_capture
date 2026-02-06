@@ -27,6 +27,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Language
   onLanguageChanged: (callback) => ipcRenderer.on('language-changed', (event, language) => callback(language)),
 
+  // Compact mode
+  onCompactModeChanged: (callback) => ipcRenderer.on('compact-mode-changed', (event, isCompact) => callback(isCompact)),
+
   // Menu actions
   onMenuSelectArea: (callback) => ipcRenderer.on('menu-select-area', callback),
 

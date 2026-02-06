@@ -266,3 +266,48 @@ footer {
 * {
   -ms-overflow-style: none;
 }
+
+/* 简化模式样式 */
+.container.compact-mode {
+  padding: 12px 8px;
+}
+
+.container.compact-mode main {
+  gap: 8px;
+}
+
+/* 简化模式：隐藏状态卡片和设置 */
+.container.compact-mode .status-card,
+.container.compact-mode .settings-section,
+.container.compact-mode footer {
+  display: none;
+}
+
+/* 简化模式：按钮垂直布局 */
+.container.compact-mode .controls {
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.container.compact-mode .btn {
+  flex-direction: column;
+  padding: 16px 12px;
+  gap: 6px;
+  border-radius: 12px;
+  min-height: 80px;
+}
+
+.container.compact-mode .btn-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.container.compact-mode .btn span {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* 简化模式：调整按钮间距 */
+.container.compact-mode .btn:not(:last-child) {
+  margin-bottom: 0;
+}

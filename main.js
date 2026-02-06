@@ -8,6 +8,7 @@ let mainWindow;
 let selectorWindow;
 let recorder;
 let currentLanguage = 'zh-CN';
+let isCompactMode = false;
 
 // Store user settings
 const settingsPath = path.join(app.getPath('userData'), 'settings.json');
@@ -150,6 +151,19 @@ function createMenu() {
       ]
     },
 
+    // 视图菜单
+    {
+      label: t.view.label,
+      submenu: [
+        {
+          label: t.view.compactMode,
+          type: 'checkbox',
+          checked: isCompactMode,
+          click: () => toggleCompactMode()
+        }
+      ]
+    },
+
     // 语言菜单
     {
       label: t.language.label,
@@ -203,6 +217,29 @@ function changeLanguage(language) {
   // 通知渲染进程更新语言
   if (mainWindow) {
     mainWindow.webContents.send('language-changed', language);
+  }
+}
+
+// 切换简化模式
+function toggleCompactMode() {
+  isCompactMode = !isCompactMode;
+
+  // 重新创建菜单以更新复选框状态
+  Menu.setApplicationMenu(null);
+  createMenu();
+
+  // 调整窗口大小
+  if (mainWindow) {
+    if (isCompactMode) {
+      // 简化模式：窄窗口
+      mainWindow.setSize(120, 600);
+    } else {
+      // 正常模式：标准窗口
+      mainWindow.setSize(420, 600);
+    }
+
+    // 通知渲染进程切换模式
+    mainWindow.webContents.send('compact-mode-changed', isCompactMode);
   }
 }
 
@@ -260,6 +297,11 @@ ipcMain.handle('start-recording', async (event, bounds) => {
       selectorWindow.close();
     }
 
+    // 开始录制时自动切换到简化模式
+    if (!isCompactMode) {
+      toggleCompactMode();
+    }
+
     return { success: true };
   } catch (error) {
     console.error('Error starting recording:', error);
@@ -270,6 +312,13 @@ ipcMain.handle('start-recording', async (event, bounds) => {
 ipcMain.handle('stop-recording', async () => {
   try {
     const result = recorder.stopRecording();
+
+    // 停止录制时恢复正常模式
+    if (isCompactMode) {
+      toggleCompactMode();
+    }
+
+    return result;
     return result;
   } catch (error) {
     console.error('Error stopping recording:', error);

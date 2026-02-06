@@ -12,6 +12,7 @@ let recordingStartTime = 0;
 let elapsedTime = 0;
 
 // DOM elements
+const appContainer = document.getElementById('appContainer');
 const selectAreaBtn = document.getElementById('selectAreaBtn');
 const startBtn = document.getElementById('startBtn');
 const pauseBtn = document.getElementById('pauseBtn');
@@ -106,6 +107,15 @@ async function init() {
     i18n.setLocale(language);
     settings.language = language;
     updateUIText();
+  });
+
+  // Listen for compact mode changes from menu
+  window.electronAPI.onCompactModeChanged((isCompact) => {
+    if (isCompact) {
+      appContainer.classList.add('compact-mode');
+    } else {
+      appContainer.classList.remove('compact-mode');
+    }
   });
 
   // Listen for menu actions
