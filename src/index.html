@@ -3,13 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>屏幕录制工具</title>
+  <title data-i18n="appTitle">屏幕录制工具</title>
   <link rel="stylesheet" href="styles.css">
+  <!-- i18n 语言文件 -->
+  <script src="i18n/i18n.js"></script>
+  <script src="i18n/zh-CN.js"></script>
+  <script src="i18n/en-US.js"></script>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>屏幕录制工具</h1>
+      <h1 data-i18n="appTitle">屏幕录制工具</h1>
     </header>
 
     <main>
@@ -17,7 +21,7 @@
       <div class="status-section">
         <div class="status-indicator" id="statusIndicator">
           <span class="status-dot"></span>
-          <span class="status-text">就绪</span>
+          <span class="status-text" data-i18n="status.ready">就绪</span>
         </div>
         <div class="timer" id="timer">00:00:00</div>
       </div>
@@ -26,28 +30,28 @@
       <div class="controls">
         <button class="btn btn-primary" id="selectAreaBtn">
           <span class="icon">📐</span>
-          选择区域
+          <span data-i18n="buttons.selectArea">选择区域</span>
         </button>
         <button class="btn btn-success" id="startBtn" disabled>
           <span class="icon">⏺</span>
-          开始
+          <span data-i18n="buttons.start">开始</span>
         </button>
         <button class="btn btn-warning" id="pauseBtn" disabled>
           <span class="icon">⏸</span>
-          暂停
+          <span data-i18n="buttons.pause">暂停</span>
         </button>
         <button class="btn btn-danger" id="stopBtn" disabled>
           <span class="icon">⏹</span>
-          停止
+          <span data-i18n="buttons.stop">停止</span>
         </button>
       </div>
 
       <!-- 设置部分 -->
       <div class="settings-section">
-        <h2>设置</h2>
+        <h2 data-i18n="settings.title">设置</h2>
 
         <div class="setting-item">
-          <label for="resolution">分辨率</label>
+          <label for="resolution" data-i18n="settings.resolution">分辨率</label>
           <select id="resolution" class="select">
             <option value="720p">720p (1280x720)</option>
             <option value="1080p" selected>1080p (1920x1080)</option>
@@ -55,7 +59,7 @@
         </div>
 
         <div class="setting-item">
-          <label for="audioToggle">音频录制</label>
+          <label for="audioToggle" data-i18n="settings.audioRecording">音频录制</label>
           <div class="toggle-container">
             <input type="checkbox" id="audioToggle" class="toggle">
             <label for="audioToggle" class="toggle-label"></label>
@@ -63,11 +67,19 @@
         </div>
 
         <div class="setting-item">
-          <label for="outputPath">输出目录</label>
+          <label for="outputPath" data-i18n="settings.outputDirectory">输出目录</label>
           <div class="path-selector">
             <input type="text" id="outputPath" class="input" readonly>
-            <button class="btn btn-secondary" id="selectPathBtn">浏览</button>
+            <button class="btn btn-secondary" id="selectPathBtn" data-i18n="buttons.browse">浏览</button>
           </div>
+        </div>
+
+        <div class="setting-item">
+          <label for="languageSelect" data-i18n="settings.language">语言</label>
+          <select id="languageSelect" class="select">
+            <option value="zh-CN">简体中文</option>
+            <option value="en-US">English</option>
+          </select>
         </div>
       </div>
     </main>

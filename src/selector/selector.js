@@ -1,3 +1,36 @@
+// 初始化 i18n
+i18n.registerLocale('zh-CN', zhCN);
+i18n.registerLocale('en-US', enUS);
+
+// 从主窗口获取语言设置
+async function initLanguage() {
+  try {
+    const settings = await window.electronAPI.getSettings();
+    const language = settings.language || 'zh-CN';
+    i18n.setLocale(language);
+    updateUIText();
+  } catch (error) {
+    console.error('Failed to load language settings:', error);
+    i18n.setLocale('zh-CN');
+    updateUIText();
+  }
+}
+
+// 更新界面文本
+function updateUIText() {
+  document.querySelectorAll('[data-i18n]').forEach(element => {
+    const key = element.getAttribute('data-i18n');
+    const text = i18n.t(key);
+
+    if (element.tagName === 'TITLE') {
+      element.textContent = text;
+      document.title = text;
+    } else {
+      element.textContent = text;
+    }
+  });
+}
+
 // Selection state
 let isSelecting = false;
 let startX = 0;
@@ -43,7 +76,10 @@ overlay.addEventListener('mouseup', () => {
 
   // Check minimum size
   if (bounds.width < MIN_WIDTH || bounds.height < MIN_HEIGHT) {
-    alert(`选区太小。最小尺寸为 ${MIN_WIDTH}x${MIN_HEIGHT} 像素。`);
+    alert(i18n.t('selector.tooSmall', {
+      minWidth: MIN_WIDTH,
+      minHeight: MIN_HEIGHT
+    }));
     resetSelection();
     return;
   }
@@ -73,9 +109,15 @@ function updateSelectionBox() {
   selectionBox.style.width = bounds.width + 'px';
   selectionBox.style.height = bounds.height + 'px';
 
-  // Update info panel
-  coordinates.textContent = `X: ${bounds.x}, Y: ${bounds.y}`;
-  dimensions.textContent = `W: ${bounds.width}, H: ${bounds.height}`;
+  // Update info panel with i18n
+  coordinates.textContent = i18n.t('selector.coordinates', {
+    x: bounds.x,
+    y: bounds.y
+  });
+  dimensions.textContent = i18n.t('selector.dimensions', {
+    width: bounds.width,
+    height: bounds.height
+  });
 }
 
 function getSelectionBounds() {
@@ -93,8 +135,8 @@ function resetSelection() {
   startY = 0;
   currentX = 0;
   currentY = 0;
-  coordinates.textContent = 'X: 0, Y: 0';
-  dimensions.textContent = 'W: 0, H: 0';
+  coordinates.textContent = i18n.t('selector.coordinates', { x: 0, y: 0 });
+  dimensions.textContent = i18n.t('selector.dimensions', { width: 0, height: 0 });
 }
 
 async function confirmSelection(bounds) {
@@ -106,3 +148,6 @@ async function confirmSelection(bounds) {
 document.addEventListener('contextmenu', (e) => {
   e.preventDefault();
 });
+
+// 初始化语言
+initLanguage();

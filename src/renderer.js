@@ -1,3 +1,7 @@
+// 初始化 i18n
+i18n.registerLocale('zh-CN', zhCN);
+i18n.registerLocale('en-US', enUS);
+
 // State management
 let settings = {};
 let selectedArea = null;
@@ -19,12 +23,70 @@ const resolutionSelect = document.getElementById('resolution');
 const audioToggle = document.getElementById('audioToggle');
 const outputPath = document.getElementById('outputPath');
 const selectPathBtn = document.getElementById('selectPathBtn');
+const languageSelect = document.getElementById('languageSelect');
+
+// 更新所有界面文本
+function updateUIText() {
+  // 更新所有带 data-i18n 属性的元素
+  document.querySelectorAll('[data-i18n]').forEach(element => {
+    const key = element.getAttribute('data-i18n');
+    const text = i18n.t(key);
+
+    // 根据元素类型更新文本
+    if (element.tagName === 'INPUT' && element.type === 'text') {
+      element.placeholder = text;
+    } else if (element.tagName === 'TITLE') {
+      element.textContent = text;
+      document.title = text;
+    } else {
+      element.textContent = text;
+    }
+  });
+
+  // 更新语言选择器的选项文本
+  const langOptions = languageSelect.querySelectorAll('option');
+  langOptions.forEach(option => {
+    const locale = option.value;
+    option.textContent = i18n.t(`languages.${locale}`);
+  });
+
+  // 更新当前状态文本（如果不是默认状态）
+  if (isRecording) {
+    updateStatus(i18n.t('status.recording'), 'recording');
+  } else if (isPaused) {
+    updateStatus(i18n.t('status.paused'), 'paused');
+  } else if (selectedArea) {
+    updateStatus(i18n.t('status.areaSelected', {
+      width: selectedArea.width,
+      height: selectedArea.height
+    }));
+  } else {
+    updateStatus(i18n.t('status.ready'));
+  }
+
+  // 更新暂停/恢复按钮文本
+  updatePauseButtonText();
+}
+
+// 更新暂停按钮文本
+function updatePauseButtonText() {
+  const pauseBtnText = pauseBtn.querySelector('span:not(.icon)');
+  if (pauseBtnText) {
+    pauseBtnText.textContent = isPaused ? i18n.t('buttons.resume') : i18n.t('buttons.pause');
+  }
+}
 
 // Initialize
 async function init() {
   // Load settings
   settings = await window.electronAPI.getSettings();
   applySettings();
+
+  // 设置语言
+  const savedLanguage = settings.language || 'zh-CN';
+  i18n.setLocale(savedLanguage);
+  languageSelect.value = savedLanguage;
+  updateUIText();
 
   // Apply theme
   const theme = await window.electronAPI.getTheme();
@@ -44,7 +106,10 @@ async function init() {
   window.electronAPI.onAreaSelected((bounds) => {
     selectedArea = bounds;
     startBtn.disabled = false;
-    updateStatus(`已选择区域: ${bounds.width}x${bounds.height}`);
+    updateStatus(i18n.t('status.areaSelected', {
+      width: bounds.width,
+      height: bounds.height
+    }));
   });
 }
 
@@ -52,12 +117,18 @@ function applySettings() {
   resolutionSelect.value = settings.resolution || '1080p';
   audioToggle.checked = settings.audioEnabled || false;
   outputPath.value = settings.outputPath || '';
+
+  // 应用语言设置
+  if (settings.language) {
+    i18n.setLocale(settings.language);
+  }
 }
 
 async function saveCurrentSettings() {
   settings.resolution = resolutionSelect.value;
   settings.audioEnabled = audioToggle.checked;
   settings.outputPath = outputPath.value;
+  settings.language = i18n.getLocale();
 
   await window.electronAPI.saveSettings(settings);
 }
@@ -80,7 +151,7 @@ startBtn.addEventListener('click', async () => {
     recordingStartTime = Date.now();
     startTimer();
     updateControls();
-    updateStatus('录制中', 'recording');
+    updateStatus(i18n.t('status.recording'), 'recording');
   }
 });
 
@@ -90,12 +161,12 @@ pauseBtn.addEventListener('click', async () => {
     isPaused = false;
     recordingStartTime = Date.now() - elapsedTime;
     startTimer();
-    updateStatus('录制中', 'recording');
+    updateStatus(i18n.t('status.recording'), 'recording');
   } else {
     await window.electronAPI.pauseRecording();
     isPaused = true;
     stopTimer();
-    updateStatus('已暂停', 'paused');
+    updateStatus(i18n.t('status.paused'), 'paused');
   }
   updateControls();
 });
@@ -107,7 +178,7 @@ stopBtn.addEventListener('click', async () => {
   stopTimer();
   resetTimer();
   updateControls();
-  updateStatus('就绪');
+  updateStatus(i18n.t('status.ready'));
   selectedArea = null;
 });
 
@@ -118,6 +189,15 @@ selectPathBtn.addEventListener('click', async () => {
     settings.outputPath = path;
     await saveCurrentSettings();
   }
+});
+
+// 语言切换事件
+languageSelect.addEventListener('change', async () => {
+  const newLanguage = languageSelect.value;
+  i18n.setLocale(newLanguage);
+  settings.language = newLanguage;
+  await saveCurrentSettings();
+  updateUIText();
 });
 
 // Settings change listeners
@@ -131,11 +211,7 @@ function updateControls() {
   pauseBtn.disabled = !isRecording;
   stopBtn.disabled = !isRecording;
 
-  if (isPaused) {
-    pauseBtn.innerHTML = '<span class="icon">▶</span> 恢复';
-  } else {
-    pauseBtn.innerHTML = '<span class="icon">⏸</span> 暂停';
-  }
+  updatePauseButtonText();
 }
 
 function updateStatus(text, state = '') {
@@ -185,20 +261,22 @@ function handleRecordingStatus(status) {
     case 'recording':
       isRecording = true;
       isPaused = false;
-      updateStatus('录制中', 'recording');
+      updateStatus(i18n.t('status.recording'), 'recording');
       updateControls();
       break;
 
     case 'paused':
       isPaused = true;
-      updateStatus('已暂停', 'paused');
+      updateStatus(i18n.t('status.paused'), 'paused');
       updateControls();
       break;
 
     case 'processing':
-      updateStatus('处理视频中...', 'processing');
+      updateStatus(i18n.t('status.processing'), 'processing');
       if (status.progress) {
-        updateStatus(`处理视频中... ${Math.round(status.progress)}%`, 'processing');
+        updateStatus(i18n.t('status.processingProgress', {
+          progress: Math.round(status.progress)
+        }), 'processing');
       }
       break;
 
@@ -207,13 +285,15 @@ function handleRecordingStatus(status) {
       isPaused = false;
       stopTimer();
       resetTimer();
-      updateStatus('就绪');
+      updateStatus(i18n.t('status.ready'));
       updateControls();
       selectedArea = null;
 
       // Show success notification
       if (status.outputPath) {
-        alert(`录制已保存到:\n${status.outputPath}`);
+        alert(i18n.t('messages.recordingSaved', {
+          path: status.outputPath
+        }));
       }
       break;
 
@@ -222,12 +302,14 @@ function handleRecordingStatus(status) {
       isPaused = false;
       stopTimer();
       resetTimer();
-      updateStatus('错误', 'error');
+      updateStatus(i18n.t('status.error'), 'error');
       updateControls();
       selectedArea = null;
 
       // Show error message
-      alert(`录制错误: ${status.error || '未知错误'}`);
+      alert(i18n.t('messages.recordingError', {
+        error: status.error || i18n.t('messages.unknownError')
+      }));
       break;
   }
 }
