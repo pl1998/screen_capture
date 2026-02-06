@@ -3,51 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Screen Recorder</title>
+  <title>屏幕录制工具</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>Screen Recorder</h1>
+      <h1>屏幕录制工具</h1>
     </header>
 
     <main>
-      <!-- Recording Status -->
+      <!-- 录制状态 -->
       <div class="status-section">
         <div class="status-indicator" id="statusIndicator">
           <span class="status-dot"></span>
-          <span class="status-text">Ready</span>
+          <span class="status-text">就绪</span>
         </div>
         <div class="timer" id="timer">00:00:00</div>
       </div>
 
-      <!-- Control Buttons -->
+      <!-- 控制按钮 -->
       <div class="controls">
         <button class="btn btn-primary" id="selectAreaBtn">
           <span class="icon">📐</span>
-          Select Area
+          选择区域
         </button>
         <button class="btn btn-success" id="startBtn" disabled>
           <span class="icon">⏺</span>
-          Start
+          开始
         </button>
         <button class="btn btn-warning" id="pauseBtn" disabled>
           <span class="icon">⏸</span>
-          Pause
+          暂停
         </button>
         <button class="btn btn-danger" id="stopBtn" disabled>
           <span class="icon">⏹</span>
-          Stop
+          停止
         </button>
       </div>
 
-      <!-- Settings Section -->
+      <!-- 设置部分 -->
       <div class="settings-section">
-        <h2>Settings</h2>
+        <h2>设置</h2>
 
         <div class="setting-item">
-          <label for="resolution">Resolution</label>
+          <label for="resolution">分辨率</label>
           <select id="resolution" class="select">
             <option value="720p">720p (1280x720)</option>
             <option value="1080p" selected>1080p (1920x1080)</option>
@@ -55,7 +55,7 @@
         </div>
 
         <div class="setting-item">
-          <label for="audioToggle">Audio Recording</label>
+          <label for="audioToggle">音频录制</label>
           <div class="toggle-container">
             <input type="checkbox" id="audioToggle" class="toggle">
             <label for="audioToggle" class="toggle-label"></label>
@@ -63,10 +63,10 @@
         </div>
 
         <div class="setting-item">
-          <label for="outputPath">Output Directory</label>
+          <label for="outputPath">输出目录</label>
           <div class="path-selector">
             <input type="text" id="outputPath" class="input" readonly>
-            <button class="btn btn-secondary" id="selectPathBtn">Browse</button>
+            <button class="btn btn-secondary" id="selectPathBtn">浏览</button>
           </div>
         </div>
       </div>

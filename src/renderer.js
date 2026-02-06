@@ -44,7 +44,7 @@ async function init() {
   window.electronAPI.onAreaSelected((bounds) => {
     selectedArea = bounds;
     startBtn.disabled = false;
-    updateStatus(`Area selected: ${bounds.width}x${bounds.height}`);
+    updateStatus(`已选择区域: ${bounds.width}x${bounds.height}`);
   });
 }
 
@@ -80,7 +80,7 @@ startBtn.addEventListener('click', async () => {
     recordingStartTime = Date.now();
     startTimer();
     updateControls();
-    updateStatus('Recording', 'recording');
+    updateStatus('录制中', 'recording');
   }
 });
 
@@ -90,12 +90,12 @@ pauseBtn.addEventListener('click', async () => {
     isPaused = false;
     recordingStartTime = Date.now() - elapsedTime;
     startTimer();
-    updateStatus('Recording', 'recording');
+    updateStatus('录制中', 'recording');
   } else {
     await window.electronAPI.pauseRecording();
     isPaused = true;
     stopTimer();
-    updateStatus('Paused', 'paused');
+    updateStatus('已暂停', 'paused');
   }
   updateControls();
 });
@@ -107,7 +107,7 @@ stopBtn.addEventListener('click', async () => {
   stopTimer();
   resetTimer();
   updateControls();
-  updateStatus('Ready');
+  updateStatus('就绪');
   selectedArea = null;
 });
 
@@ -132,9 +132,9 @@ function updateControls() {
   stopBtn.disabled = !isRecording;
 
   if (isPaused) {
-    pauseBtn.innerHTML = '<span class="icon">▶</span> Resume';
+    pauseBtn.innerHTML = '<span class="icon">▶</span> 恢复';
   } else {
-    pauseBtn.innerHTML = '<span class="icon">⏸</span> Pause';
+    pauseBtn.innerHTML = '<span class="icon">⏸</span> 暂停';
   }
 }
 
@@ -185,20 +185,20 @@ function handleRecordingStatus(status) {
     case 'recording':
       isRecording = true;
       isPaused = false;
-      updateStatus('Recording', 'recording');
+      updateStatus('录制中', 'recording');
       updateControls();
       break;
 
     case 'paused':
       isPaused = true;
-      updateStatus('Paused', 'paused');
+      updateStatus('已暂停', 'paused');
       updateControls();
       break;
 
     case 'processing':
-      updateStatus('Processing video...', 'processing');
+      updateStatus('处理视频中...', 'processing');
       if (status.progress) {
-        updateStatus(`Processing video... ${Math.round(status.progress)}%`, 'processing');
+        updateStatus(`处理视频中... ${Math.round(status.progress)}%`, 'processing');
       }
       break;
 
@@ -207,13 +207,13 @@ function handleRecordingStatus(status) {
       isPaused = false;
       stopTimer();
       resetTimer();
-      updateStatus('Ready');
+      updateStatus('就绪');
       updateControls();
       selectedArea = null;
 
       // Show success notification
       if (status.outputPath) {
-        alert(`Recording saved to:\n${status.outputPath}`);
+        alert(`录制已保存到:\n${status.outputPath}`);
       }
       break;
 
@@ -222,12 +222,12 @@ function handleRecordingStatus(status) {
       isPaused = false;
       stopTimer();
       resetTimer();
-      updateStatus('Error', 'error');
+      updateStatus('错误', 'error');
       updateControls();
       selectedArea = null;
 
       // Show error message
-      alert(`Recording error: ${status.error || 'Unknown error'}`);
+      alert(`录制错误: ${status.error || '未知错误'}`);
       break;
   }
 }

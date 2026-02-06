@@ -43,7 +43,7 @@ overlay.addEventListener('mouseup', () => {
 
   // Check minimum size
   if (bounds.width < MIN_WIDTH || bounds.height < MIN_HEIGHT) {
-    alert(`Selection too small. Minimum size is ${MIN_WIDTH}x${MIN_HEIGHT} pixels.`);
+    alert(`选区太小。最小尺寸为 ${MIN_WIDTH}x${MIN_HEIGHT} 像素。`);
     resetSelection();
     return;
   }
