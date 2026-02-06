@@ -85,7 +85,7 @@ Use the icon generation scripts:
 
 See `assets/README.md` for detailed instructions.
 
-For complete build documentation, see [BUILD.md](BUILD.md).
+For complete build documentation, see [BUILD.md](docs/BUILD.md).
 
 ## Usage
 
@@ -135,11 +135,15 @@ screen_capture/
 
 ## Documentation
 
-- [QUICKSTART.md](QUICKSTART.md) - Quick start guide for users
-- [BUILD.md](BUILD.md) - Detailed build and distribution guide
-- [IMPLEMENTATION.md](IMPLEMENTATION.md) - Technical implementation details
-- [CHANGELOG.md](CHANGELOG.md) - Version history and changes
-- [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) - Release preparation checklist
+All project documentation is located in the `docs/` folder:
+
+- [中文文档索引](docs/中文文档索引.md) - Chinese documentation index
+- [文档规范](docs/文档规范.md) - Documentation standards (Chinese)
+- [QUICKSTART.md](docs/QUICKSTART.md) - Quick start guide for users
+- [BUILD.md](docs/BUILD.md) - Detailed build and distribution guide
+- [IMPLEMENTATION.md](docs/IMPLEMENTATION.md) - Technical implementation details
+- [CHANGELOG.md](docs/CHANGELOG.md) - Version history and changes
+- [RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) - Release preparation checklist
 - [assets/README.md](assets/README.md) - Icon creation guide
 
 ## Known Limitations

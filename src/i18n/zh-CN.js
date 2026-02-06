@@ -29,6 +29,10 @@ const zhCN = {
     title: '设置',
     resolution: '分辨率',
     audioRecording: '音频录制',
+    audioNone: '关闭',
+    audioMicrophone: '麦克风',
+    audioSystem: '系统声音',
+    audioBoth: '麦克风 + 系统声音',
     outputDirectory: '输出目录',
     language: '语言'
   },

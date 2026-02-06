@@ -20,9 +20,7 @@ const statusIndicator = document.getElementById('statusIndicator');
 const statusText = statusIndicator.querySelector('.status-text');
 const timer = document.getElementById('timer');
 const resolutionSelect = document.getElementById('resolution');
-const audioToggle = document.getElementById('audioToggle');
-const outputPath = document.getElementById('outputPath');
-const selectPathBtn = document.getElementById('selectPathBtn');
+const audioSourceSelect = document.getElementById('audioSource');
 
 // 更新所有界面文本
 function updateUIText() {
@@ -62,7 +60,7 @@ function updateUIText() {
 
 // 更新暂停按钮文本
 function updatePauseButtonText() {
-  const pauseBtnText = pauseBtn.querySelector('span:not(.icon)');
+  const pauseBtnText = pauseBtn.querySelector('span');
   if (pauseBtnText) {
     pauseBtnText.textContent = isPaused ? i18n.t('buttons.resume') : i18n.t('buttons.pause');
   }
@@ -118,8 +116,7 @@ async function init() {
 
 function applySettings() {
   resolutionSelect.value = settings.resolution || '1080p';
-  audioToggle.checked = settings.audioEnabled || false;
-  outputPath.value = settings.outputPath || '';
+  audioSourceSelect.value = settings.audioSource || 'none';
 
   // 应用语言设置
   if (settings.language) {
@@ -129,8 +126,7 @@ function applySettings() {
 
 async function saveCurrentSettings() {
   settings.resolution = resolutionSelect.value;
-  settings.audioEnabled = audioToggle.checked;
-  settings.outputPath = outputPath.value;
+  settings.audioSource = audioSourceSelect.value;
   settings.language = i18n.getLocale();
 
   await window.electronAPI.saveSettings(settings);
@@ -185,18 +181,9 @@ stopBtn.addEventListener('click', async () => {
   selectedArea = null;
 });
 
-selectPathBtn.addEventListener('click', async () => {
-  const path = await window.electronAPI.selectDirectory();
-  if (path) {
-    outputPath.value = path;
-    settings.outputPath = path;
-    await saveCurrentSettings();
-  }
-});
-
 // Settings change listeners
 resolutionSelect.addEventListener('change', saveCurrentSettings);
-audioToggle.addEventListener('change', saveCurrentSettings);
+audioSourceSelect.addEventListener('change', saveCurrentSettings);
 
 // UI update functions
 function updateControls() {

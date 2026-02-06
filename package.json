@@ -12,7 +12,13 @@
     "pack": "electron-builder --dir",
     "postinstall": "electron-builder install-app-deps"
   },
-  "keywords": ["electron", "screen-recorder", "ffmpeg", "video", "capture"],
+  "keywords": [
+    "electron",
+    "screen-recorder",
+    "ffmpeg",
+    "video",
+    "capture"
+  ],
   "author": {
     "name": "Screen Recorder Team",
     "email": "support@screenrecorder.app"
@@ -27,7 +33,7 @@
     "electron-builder": "^24.9.1"
   },
   "dependencies": {
-    "ffmpeg-static": "^5.2.0",
+    "ffmpeg-static": "^5.3.0",
     "fluent-ffmpeg": "^2.1.2"
   },
   "build": {
@@ -63,11 +69,16 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64", "ia32"]
+          "arch": [
+            "x64",
+            "ia32"
+          ]
         },
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "assets/icon.ico",
@@ -94,11 +105,17 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         },
         {
           "target": "zip",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ],
       "icon": "assets/icon.icns",
@@ -128,7 +145,11 @@
       }
     },
     "linux": {
-      "target": ["AppImage", "deb", "rpm"],
+      "target": [
+        "AppImage",
+        "deb",
+        "rpm"
+      ],
       "icon": "assets/icon.png",
       "category": "Video",
       "artifactName": "${productName}-${version}-${arch}.${ext}"
@@ -137,7 +158,9 @@
       {
         "from": "node_modules/ffmpeg-static",
         "to": "ffmpeg",
-        "filter": ["**/*"]
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "asar": true,
@@ -146,4 +169,3 @@
     ]
   }
 }
-

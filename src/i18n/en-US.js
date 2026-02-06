@@ -29,6 +29,10 @@ const enUS = {
     title: 'Settings',
     resolution: 'Resolution',
     audioRecording: 'Audio Recording',
+    audioNone: 'Off',
+    audioMicrophone: 'Microphone',
+    audioSystem: 'System Audio',
+    audioBoth: 'Microphone + System Audio',
     outputDirectory: 'Output Directory',
     language: 'Language'
   },
