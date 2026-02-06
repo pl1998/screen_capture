@@ -2,7 +2,6 @@ const { BrowserWindow, desktopCapturer, app } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
-const ffmpegStatic = require('ffmpeg-static');
 
 // Set FFmpeg path
 // 在打包后的应用中，需要使用正确的资源路径
@@ -10,7 +9,7 @@ let ffmpegPath;
 
 // 检查是否是打包后的应用
 if (app.isPackaged) {
-  // 打包后，不使用 ffmpeg-static 返回的路径
+  // 打包后，不使用 ffmpeg-static 模块
   const platform = process.platform;
   const ffmpegName = platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg';
 
@@ -44,6 +43,7 @@ if (app.isPackaged) {
   }
 } else {
   // 开发环境，使用 ffmpeg-static
+  const ffmpegStatic = require('ffmpeg-static');
   ffmpegPath = ffmpegStatic;
   console.log('Development mode, using ffmpeg-static:', ffmpegPath);
 }
