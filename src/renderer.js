@@ -23,7 +23,6 @@ const resolutionSelect = document.getElementById('resolution');
 const audioToggle = document.getElementById('audioToggle');
 const outputPath = document.getElementById('outputPath');
 const selectPathBtn = document.getElementById('selectPathBtn');
-const languageSelect = document.getElementById('languageSelect');
 
 // 更新所有界面文本
 function updateUIText() {
@@ -41,13 +40,6 @@ function updateUIText() {
     } else {
       element.textContent = text;
     }
-  });
-
-  // 更新语言选择器的选项文本
-  const langOptions = languageSelect.querySelectorAll('option');
-  langOptions.forEach(option => {
-    const locale = option.value;
-    option.textContent = i18n.t(`languages.${locale}`);
   });
 
   // 更新当前状态文本（如果不是默认状态）
@@ -85,7 +77,6 @@ async function init() {
   // 设置语言
   const savedLanguage = settings.language || 'zh-CN';
   i18n.setLocale(savedLanguage);
-  languageSelect.value = savedLanguage;
   updateUIText();
 
   // Apply theme
@@ -110,6 +101,18 @@ async function init() {
       width: bounds.width,
       height: bounds.height
     }));
+  });
+
+  // Listen for language changes from menu
+  window.electronAPI.onLanguageChanged((language) => {
+    i18n.setLocale(language);
+    settings.language = language;
+    updateUIText();
+  });
+
+  // Listen for menu actions
+  window.electronAPI.onMenuSelectArea(() => {
+    selectAreaBtn.click();
   });
 }
 
@@ -189,15 +192,6 @@ selectPathBtn.addEventListener('click', async () => {
     settings.outputPath = path;
     await saveCurrentSettings();
   }
-});
-
-// 语言切换事件
-languageSelect.addEventListener('change', async () => {
-  const newLanguage = languageSelect.value;
-  i18n.setLocale(newLanguage);
-  settings.language = newLanguage;
-  await saveCurrentSettings();
-  updateUIText();
 });
 
 // Settings change listeners

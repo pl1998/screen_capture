@@ -24,6 +24,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getTheme: () => ipcRenderer.invoke('get-theme'),
   onThemeChanged: (callback) => ipcRenderer.on('theme-changed', (event, theme) => callback(theme)),
 
+  // Language
+  onLanguageChanged: (callback) => ipcRenderer.on('language-changed', (event, language) => callback(language)),
+
+  // Menu actions
+  onMenuSelectArea: (callback) => ipcRenderer.on('menu-select-area', callback),
+
   // Recording status updates
   onRecordingStatus: (callback) => ipcRenderer.on('recording-status', (event, status) => callback(status))
 });

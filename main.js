@@ -1,11 +1,13 @@
-const { app, BrowserWindow, ipcMain, dialog, screen, nativeTheme } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, screen, nativeTheme, Menu, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const ScreenRecorder = require('./recorder');
+const menuI18n = require('./menu-i18n');
 
 let mainWindow;
 let selectorWindow;
 let recorder;
+let currentLanguage = 'zh-CN';
 
 // Store user settings
 const settingsPath = path.join(app.getPath('userData'), 'settings.json');
@@ -13,7 +15,12 @@ const settingsPath = path.join(app.getPath('userData'), 'settings.json');
 function loadSettings() {
   try {
     if (fs.existsSync(settingsPath)) {
-      return JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+      const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+      // 加载语言设置
+      if (settings.language) {
+        currentLanguage = settings.language;
+      }
+      return settings;
     }
   } catch (error) {
     console.error('Error loading settings:', error);
@@ -24,7 +31,8 @@ function loadSettings() {
     resolution: '1080p',
     outputPath: app.getPath('videos'),
     audioEnabled: false,
-    theme: 'system'
+    theme: 'system',
+    language: 'zh-CN'
   };
 }
 
@@ -79,6 +87,123 @@ function createSelectorWindow() {
   selectorWindow.on('closed', () => {
     selectorWindow = null;
   });
+}
+
+// 创建应用菜单
+function createMenu() {
+  const t = menuI18n[currentLanguage];
+  const isMac = process.platform === 'darwin';
+
+  const template = [
+    // macOS 应用菜单
+    ...(isMac ? [{
+      label: app.name,
+      submenu: [
+        { label: t.app.about, role: 'about' },
+        { type: 'separator' },
+        { label: t.app.hide, role: 'hide' },
+        { label: t.app.hideOthers, role: 'hideOthers' },
+        { label: t.app.unhide, role: 'unhide' },
+        { type: 'separator' },
+        { label: t.app.quit, role: 'quit' }
+      ]
+    }] : []),
+
+    // 文件菜单
+    {
+      label: t.file.label,
+      submenu: [
+        {
+          label: t.file.selectArea,
+          accelerator: 'CmdOrCtrl+S',
+          click: () => {
+            if (mainWindow) {
+              mainWindow.webContents.send('menu-select-area');
+            }
+          }
+        },
+        { type: 'separator' },
+        {
+          label: t.file.openOutputFolder,
+          click: async () => {
+            const settings = loadSettings();
+            const outputPath = settings.outputPath || app.getPath('videos');
+            shell.openPath(outputPath);
+          }
+        },
+        { type: 'separator' },
+        ...(!isMac ? [{ label: t.app.quit, role: 'quit' }] : [])
+      ]
+    },
+
+    // 编辑菜单（简化版）
+    {
+      label: t.edit.label,
+      submenu: [
+        { label: t.edit.undo, role: 'undo' },
+        { label: t.edit.redo, role: 'redo' },
+        { type: 'separator' },
+        { label: t.edit.cut, role: 'cut' },
+        { label: t.edit.copy, role: 'copy' },
+        { label: t.edit.paste, role: 'paste' },
+        { label: t.edit.selectAll, role: 'selectAll' }
+      ]
+    },
+
+    // 语言菜单
+    {
+      label: t.language.label,
+      submenu: [
+        {
+          label: t.language.chinese,
+          type: 'radio',
+          checked: currentLanguage === 'zh-CN',
+          click: () => changeLanguage('zh-CN')
+        },
+        {
+          label: t.language.english,
+          type: 'radio',
+          checked: currentLanguage === 'en-US',
+          click: () => changeLanguage('en-US')
+        }
+      ]
+    },
+
+    // 窗口菜单
+    {
+      label: t.window.label,
+      submenu: [
+        { label: t.window.minimize, role: 'minimize' },
+        { label: t.window.close, role: 'close' },
+        ...(isMac ? [
+          { type: 'separator' },
+          { label: t.window.front, role: 'front' }
+        ] : [])
+      ]
+    }
+  ];
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
+}
+
+// 切换语言
+function changeLanguage(language) {
+  currentLanguage = language;
+
+  // 保存语言设置
+  const settings = loadSettings();
+  settings.language = language;
+  saveSettings(settings);
+
+  // 清除当前菜单并重新创建（确保菜单刷新）
+  Menu.setApplicationMenu(null);
+  createMenu();
+
+  // 通知渲染进程更新语言
+  if (mainWindow) {
+    mainWindow.webContents.send('language-changed', language);
+  }
 }
 
 // IPC Handlers
@@ -166,6 +291,13 @@ ipcMain.handle('get-theme', () => {
 
 // App lifecycle
 app.whenReady().then(async () => {
+  // 加载设置（包括语言）
+  const settings = loadSettings();
+  currentLanguage = settings.language || 'zh-CN';
+
+  // 创建菜单
+  createMenu();
+
   // Initialize recorder
   recorder = new ScreenRecorder();
   await recorder.initialize();
