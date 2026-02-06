@@ -214,12 +214,11 @@ function changeLanguage(language) {
   settings.language = language;
   saveSettings(settings);
 
-  // 清除当前菜单并重新创建（确保菜单刷新）
-  Menu.setApplicationMenu(null);
+  // 重新创建菜单（不需要先设置为 null）
   createMenu();
 
   // 通知渲染进程更新语言
-  if (mainWindow) {
+  if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send('language-changed', language);
   }
 }
@@ -229,7 +228,6 @@ function toggleCompactMode() {
   isCompactMode = !isCompactMode;
 
   // 重新创建菜单以更新复选框状态
-  Menu.setApplicationMenu(null);
   createMenu();
 
   // 调整窗口大小

@@ -25,6 +25,8 @@ const audioSourceSelect = document.getElementById('audioSource');
 
 // 更新所有界面文本
 function updateUIText() {
+  console.log('updateUIText called, current locale:', i18n.getLocale());
+
   // 更新所有带 data-i18n 属性的元素
   document.querySelectorAll('[data-i18n]').forEach(element => {
     const key = element.getAttribute('data-i18n');
@@ -36,6 +38,9 @@ function updateUIText() {
     } else if (element.tagName === 'TITLE') {
       element.textContent = text;
       document.title = text;
+    } else if (element.tagName === 'OPTION') {
+      // 特殊处理 option 元素
+      element.textContent = text;
     } else {
       element.textContent = text;
     }
@@ -57,6 +62,8 @@ function updateUIText() {
 
   // 更新暂停/恢复按钮文本
   updatePauseButtonText();
+
+  console.log('updateUIText completed');
 }
 
 // 更新暂停按钮文本
@@ -104,9 +111,12 @@ async function init() {
 
   // Listen for language changes from menu
   window.electronAPI.onLanguageChanged((language) => {
+    console.log('Language changed to:', language);
     i18n.setLocale(language);
     settings.language = language;
+    console.log('Updating UI text...');
     updateUIText();
+    console.log('UI text updated');
   });
 
   // Listen for compact mode changes from menu
