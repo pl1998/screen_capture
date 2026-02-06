@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2024-02-06
+## [1.0.0] - 2026-02-06
 
 ### Added
 - Initial release
@@ -24,6 +24,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Visual feedback during recording
 - Progress indicator during video processing
 - Timestamp-based file naming
+- Multi-language support (Chinese and English)
+- Compact mode for minimal UI during recording
+- Menu bar with keyboard shortcuts
+
+### Fixed
+- **Recording area cropping**: Videos now correctly record only the selected area instead of the entire screen
+  - Implemented FFmpeg crop filter to accurately crop video to selected bounds
+  - Added proper bounds parameter passing through the recording pipeline
+- **FFmpeg path resolution in packaged apps**: Fixed "spawn ffmpeg.exe ENOENT" error in production builds
+  - Implemented multi-path fallback mechanism for FFmpeg binary location
+  - Added proper resource path resolution for ASAR packaged applications
+  - Delayed require('ffmpeg-static') to only load in development mode
+- **Language switching crash**: Fixed application exit when changing language in menu
+  - Removed problematic Menu.setApplicationMenu(null) call
+  - Added window state validation with !mainWindow.isDestroyed()
+  - Improved menu update logic to prevent crashes
+- **Recording border visibility**: Fixed border appearing in output videos
+  - Selector window now hides during active recording
+  - Border only shows when paused or selecting area
+- **Compact mode sizing**: Fixed window height consistency
+  - Adjusted compact mode height from 600 to 680 pixels to match main window
+  - Ensured proper window dimensions in both normal and compact modes
+- **Code quality**: Removed duplicate return statement in stop-recording handler
 
 ### Technical Details
 - Electron 28.x framework
@@ -32,10 +55,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CRF 23 quality setting
 - Secure IPC communication
 - ASAR packaging for app resources
+- i18n system for multi-language support
+- Dynamic menu generation based on language selection
 
 ### Known Limitations
 - Audio recording UI present but not yet functional
-- Records full screen then crops during encoding
 - First recording may be slower due to FFmpeg initialization
 
 ## [Unreleased]

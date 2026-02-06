@@ -231,13 +231,13 @@ function toggleCompactMode() {
   createMenu();
 
   // 调整窗口大小
-  if (mainWindow) {
+  if (mainWindow && !mainWindow.isDestroyed()) {
     if (isCompactMode) {
       // 简化模式：窄窗口
-      mainWindow.setSize(120, 600);
+      mainWindow.setSize(120, 680);
     } else {
       // 正常模式：标准窗口
-      mainWindow.setSize(420, 600);
+      mainWindow.setSize(420, 680);
     }
 
     // 通知渲染进程切换模式
@@ -326,7 +326,6 @@ ipcMain.handle('stop-recording', async () => {
       toggleCompactMode();
     }
 
-    return result;
     return result;
   } catch (error) {
     console.error('Error stopping recording:', error);
