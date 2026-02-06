@@ -19,6 +19,19 @@ A cross-platform desktop application for recording screen areas with high qualit
 - **Output Format**: MP4
 - **Minimum Selection**: 100x100 pixels
 
+## interface Img
+
+<br/>
+
+<img src="docs/demo_home.png">
+
+<br/>
+
+<img src="docs/demo_right.png">
+
+
+<br/>
+
 ## Installation
 
 1. Install dependencies:
