@@ -1,11 +1,56 @@
-const { BrowserWindow, desktopCapturer } = require('electron');
+const { BrowserWindow, desktopCapturer, app } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
 const ffmpegStatic = require('ffmpeg-static');
 
 // Set FFmpeg path
-ffmpeg.setFfmpegPath(ffmpegStatic);
+// 在打包后的应用中，需要使用正确的资源路径
+let ffmpegPath;
+
+// 检查是否是打包后的应用
+if (app.isPackaged) {
+  // 打包后，不使用 ffmpeg-static 返回的路径
+  const platform = process.platform;
+  const ffmpegName = platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg';
+
+  // 尝试多个可能的路径
+  const possiblePaths = [
+    // 方案1: extraResources 配置的路径
+    path.join(process.resourcesPath, 'ffmpeg', ffmpegName),
+    // 方案2: app.asar.unpacked 路径
+    path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'ffmpeg-static', ffmpegName),
+    // 方案3: 直接在 resources 下
+    path.join(process.resourcesPath, ffmpegName)
+  ];
+
+  console.log('Searching for FFmpeg in packaged app...');
+  console.log('Resources path:', process.resourcesPath);
+
+  for (const testPath of possiblePaths) {
+    console.log('Trying path:', testPath);
+    if (fs.existsSync(testPath)) {
+      ffmpegPath = testPath;
+      console.log('Found FFmpeg at:', ffmpegPath);
+      break;
+    }
+  }
+
+  if (!ffmpegPath) {
+    console.error('FFmpeg not found in any expected location!');
+    console.error('Tried paths:', possiblePaths);
+    // 使用第一个路径作为回退（即使不存在，也能显示预期路径）
+    ffmpegPath = possiblePaths[0];
+  }
+} else {
+  // 开发环境，使用 ffmpeg-static
+  ffmpegPath = ffmpegStatic;
+  console.log('Development mode, using ffmpeg-static:', ffmpegPath);
+}
+
+console.log('Final FFmpeg path:', ffmpegPath);
+console.log('FFmpeg exists:', fs.existsSync(ffmpegPath));
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 class ScreenRecorder {
   constructor() {
