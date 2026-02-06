@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Recording</title>
+</head>
+<body>
+  <script>
+    const { desktopCapturer } = require('electron');
+    const { ipcRenderer } = require('electron');
+
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let stream = null;
+
+    // Listen for start recording command
+    ipcRenderer.on('start-capture', async (event, { sourceId, bounds }) => {
+      try {
+        // Get the screen stream
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: {
+            mandatory: {
+              chromeMediaSource: 'desktop',
+              chromeMediaSourceId: sourceId
+            }
+          }
+        });
+
+        const options = {
+          mimeType: 'video/webm;codecs=vp9',
+          videoBitsPerSecond: 5000000
+        };
+
+        mediaRecorder = new MediaRecorder(stream, options);
+        recordedChunks = [];
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) {
+            recordedChunks.push(e.data);
+          }
+        };
+
+        mediaRecorder.onstop = async () => {
+          const blob = new Blob(recordedChunks, { type: 'video/webm' });
+          const buffer = await blob.arrayBuffer();
+          ipcRenderer.send('recording-stopped', Buffer.from(buffer));
+
+          // Stop all tracks
+          stream.getTracks().forEach(track => track.stop());
+        };
+
+        mediaRecorder.start(1000);
+        ipcRenderer.send('recording-started', { success: true });
+      } catch (error) {
+        ipcRenderer.send('recording-error', { error: error.message });
+      }
+    });
+
+    // Listen for pause command
+    ipcRenderer.on('pause-capture', () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.pause();
+        ipcRenderer.send('recording-paused');
+      }
+    });
+
+    // Listen for resume command
+    ipcRenderer.on('resume-capture', () => {
+      if (mediaRecorder && mediaRecorder.state === 'paused') {
+        mediaRecorder.resume();
+        ipcRenderer.send('recording-resumed');
+      }
+    });
+
+    // Listen for stop command
+    ipcRenderer.on('stop-capture', () => {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+    });
+  </script>
+</body>
+</html>

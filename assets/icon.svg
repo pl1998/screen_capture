@@ -1,0 +1,15 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="512" cy="512" r="480" fill="#0078d4"/>
+
+  <!-- Screen rectangle -->
+  <rect x="256" y="256" width="512" height="384" rx="24" fill="white" opacity="0.9"/>
+
+  <!-- Selection frame -->
+  <rect x="320" y="320" width="384" height="256" rx="12" fill="none" stroke="#60cdff" stroke-width="16" stroke-dasharray="32 16"/>
+
+  <!-- Record button (circle) -->
+  <circle cx="512" cy="768" r="80" fill="#d13438"/>
+  <circle cx="512" cy="768" r="60" fill="white"/>
+  <circle cx="512" cy="768" r="40" fill="#d13438"/>
+</svg>
