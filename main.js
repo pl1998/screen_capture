@@ -297,10 +297,10 @@ ipcMain.handle('start-recording', async (event, bounds) => {
     const settings = loadSettings();
     await recorder.startRecording(bounds, settings);
 
-    // 不关闭选择器窗口，让它显示录制边框
-    // if (selectorWindow) {
-    //   selectorWindow.close();
-    // }
+    // 隐藏选择器窗口，避免边框被录制到视频中
+    if (selectorWindow) {
+      selectorWindow.hide();
+    }
 
     // 开始录制时自动切换到简化模式
     if (!isCompactMode) {
@@ -337,10 +337,18 @@ ipcMain.handle('stop-recording', async () => {
 });
 
 ipcMain.handle('pause-recording', () => {
+  // 暂停时显示选择器窗口（显示暂停状态的边框）
+  if (selectorWindow) {
+    selectorWindow.show();
+  }
   return recorder.pauseRecording();
 });
 
 ipcMain.handle('resume-recording', () => {
+  // 恢复录制时隐藏选择器窗口
+  if (selectorWindow) {
+    selectorWindow.hide();
+  }
   return recorder.resumeRecording();
 });
 

@@ -148,8 +148,8 @@ class ScreenRecorder {
       // Save temporary WebM file
       fs.writeFileSync(tempPath, buffer);
 
-      // Convert to MP4 with FFmpeg
-      await this.convertToMP4(tempPath, outputPath, resolution);
+      // Convert to MP4 with FFmpeg (with cropping)
+      await this.convertToMP4(tempPath, outputPath, resolution, this.bounds);
 
       // Delete temporary file
       try {
@@ -175,19 +175,35 @@ class ScreenRecorder {
     }
   }
 
-  convertToMP4(inputPath, outputPath, resolution) {
+  convertToMP4(inputPath, outputPath, resolution, bounds) {
     return new Promise((resolve, reject) => {
-      ffmpeg(inputPath)
+      const ffmpegCommand = ffmpeg(inputPath)
         .videoCodec('libx264')
         .audioCodec('aac')
-        .size(`${resolution.width}x${resolution.height}`)
         .fps(30)
         .outputOptions([
           '-preset fast',
           '-crf 23',
           '-pix_fmt yuv420p',
           '-movflags +faststart'
-        ])
+        ]);
+
+      // 如果有选中区域，使用 crop 滤镜裁剪视频
+      if (bounds) {
+        // FFmpeg crop 滤镜: crop=width:height:x:y
+        const cropFilter = `crop=${bounds.width}:${bounds.height}:${bounds.x}:${bounds.y}`;
+
+        // 裁剪后再缩放到目标分辨率
+        const scaleFilter = `scale=${resolution.width}:${resolution.height}`;
+
+        // 组合滤镜
+        ffmpegCommand.videoFilters([cropFilter, scaleFilter]);
+      } else {
+        // 如果没有选中区域，只缩放
+        ffmpegCommand.size(`${resolution.width}x${resolution.height}`);
+      }
+
+      ffmpegCommand
         .on('start', (cmd) => {
           console.log('FFmpeg command:', cmd);
         })
