@@ -33,6 +33,8 @@ function updateUIText() {
 
 // Selection state
 let isSelecting = false;
+let isConfirmed = false;
+let recordingState = 'idle'; // idle, recording, paused
 let startX = 0;
 let startY = 0;
 let currentX = 0;
@@ -45,6 +47,7 @@ const MIN_HEIGHT = 100;
 // DOM elements
 const overlay = document.getElementById('overlay');
 const selectionBox = document.getElementById('selectionBox');
+const infoPanel = document.getElementById('infoPanel');
 const coordinates = document.getElementById('coordinates');
 const dimensions = document.getElementById('dimensions');
 
@@ -140,8 +143,20 @@ function resetSelection() {
 }
 
 async function confirmSelection(bounds) {
+  isConfirmed = true;
+
+  // 切换到确认状态
+  selectionBox.classList.remove('active');
+  selectionBox.classList.add('confirmed');
+
+  // 隐藏信息面板
+  infoPanel.classList.add('hidden');
+
+  // 禁用鼠标交互
+  overlay.style.pointerEvents = 'none';
+
   await window.electronAPI.areaSelected(bounds);
-  // The selector window will be closed by the main process
+  // 不关闭选择器窗口，等待录制状态更新
 }
 
 // Prevent context menu
@@ -151,3 +166,21 @@ document.addEventListener('contextmenu', (e) => {
 
 // 初始化语言
 initLanguage();
+
+// 监听录制状态变化
+window.electronAPI.onRecordingStatus((status) => {
+  if (!isConfirmed) return;
+
+  if (status.status === 'recording') {
+    recordingState = 'recording';
+    selectionBox.classList.remove('confirmed', 'paused');
+    selectionBox.classList.add('recording');
+  } else if (status.status === 'paused') {
+    recordingState = 'paused';
+    selectionBox.classList.remove('recording');
+    selectionBox.classList.add('paused');
+  } else if (status.status === 'completed' || status.status === 'error') {
+    // 录制结束，关闭选择器窗口
+    window.electronAPI.closeSelector();
+  }
+});

@@ -24,8 +24,8 @@ body {
 
 .selection-box {
   position: absolute;
-  border: 2px solid #0078d4;
-  background-color: rgba(0, 120, 212, 0.1);
+  border: 3px solid #667eea;
+  background-color: transparent;
   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.3);
   display: none;
   pointer-events: none;
@@ -35,29 +35,97 @@ body {
   display: block;
 }
 
+/* 已确认状态：实线框 */
+.selection-box.confirmed {
+  display: block;
+  border: 3px solid #667eea;
+  background-color: transparent;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+}
+
+/* 录制状态：闪烁渐变紫色光 */
+.selection-box.recording {
+  display: block;
+  border: 4px solid #667eea;
+  background-color: transparent;
+  box-shadow:
+    0 0 0 9999px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(102, 126, 234, 0.8),
+    0 0 40px rgba(118, 75, 162, 0.6),
+    inset 0 0 20px rgba(102, 126, 234, 0.3);
+  animation: recordingGlow 2s ease-in-out infinite;
+}
+
+/* 暂停状态：停止闪烁 */
+.selection-box.paused {
+  display: block;
+  border: 3px solid #f59e0b;
+  background-color: transparent;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+}
+
+/* 录制闪烁动画 */
+@keyframes recordingGlow {
+  0%, 100% {
+    border-color: #667eea;
+    box-shadow:
+      0 0 0 9999px rgba(0, 0, 0, 0.5),
+      0 0 20px rgba(102, 126, 234, 0.8),
+      0 0 40px rgba(118, 75, 162, 0.6),
+      inset 0 0 20px rgba(102, 126, 234, 0.3);
+  }
+  50% {
+    border-color: #764ba2;
+    box-shadow:
+      0 0 0 9999px rgba(0, 0, 0, 0.5),
+      0 0 30px rgba(118, 75, 162, 1),
+      0 0 60px rgba(240, 147, 251, 0.8),
+      inset 0 0 30px rgba(118, 75, 162, 0.5);
+  }
+}
+
 /* Resize handles */
 .selection-box::before,
 .selection-box::after {
   content: '';
   position: absolute;
-  background-color: #0078d4;
+  background-color: #667eea;
 }
 
 /* Corner indicators */
 .selection-box::before {
-  top: -4px;
-  left: -4px;
-  width: 8px;
-  height: 8px;
+  top: -6px;
+  left: -6px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
 }
 
 .selection-box::after {
-  bottom: -4px;
-  right: -4px;
-  width: 8px;
-  height: 8px;
+  bottom: -6px;
+  right: -6px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
+}
+
+/* 录制状态的角标 */
+.selection-box.recording::before,
+.selection-box.recording::after {
+  background-color: #764ba2;
+  box-shadow: 0 0 10px rgba(118, 75, 162, 0.8);
+  animation: cornerGlow 2s ease-in-out infinite;
+}
+
+@keyframes cornerGlow {
+  0%, 100% {
+    background-color: #667eea;
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.8);
+  }
+  50% {
+    background-color: #f093fb;
+    box-shadow: 0 0 15px rgba(240, 147, 251, 1);
+  }
 }
 
 .info-panel {
@@ -92,13 +160,18 @@ body {
 /* Animation for selection box */
 @keyframes borderPulse {
   0%, 100% {
-    border-color: #0078d4;
+    border-color: #667eea;
   }
   50% {
-    border-color: #60cdff;
+    border-color: #764ba2;
   }
 }
 
 .selection-box.active {
   animation: borderPulse 2s infinite;
+}
+
+/* 隐藏信息面板（确认后） */
+.info-panel.hidden {
+  display: none;
 }

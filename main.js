@@ -46,16 +46,20 @@ function saveSettings(settings) {
 }
 
 function createMainWindow() {
+  const isMac = process.platform === 'darwin';
+
   mainWindow = new BrowserWindow({
     width: 420,
-    height: 600,
+    height: 680,
     resizable: false,
+    transparent: true,
+    backgroundColor: '#00000000', // 完全透明
+    titleBarStyle: isMac ? 'hiddenInset' : 'default',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js')
-    },
-    backgroundColor: nativeTheme.shouldUseDarkColors ? '#1e1e1e' : '#ffffff'
+    }
   });
 
   mainWindow.loadFile('src/index.html');
@@ -280,10 +284,10 @@ ipcMain.handle('area-selected', (event, bounds) => {
     mainWindow.webContents.send('area-selected', bounds);
   }
 
-  // Close the selector window
-  if (selectorWindow) {
-    selectorWindow.close();
-  }
+  // 不关闭选择器窗口，保持显示边框
+  // if (selectorWindow) {
+  //   selectorWindow.close();
+  // }
 
   return { success: true };
 });
@@ -293,9 +297,10 @@ ipcMain.handle('start-recording', async (event, bounds) => {
     const settings = loadSettings();
     await recorder.startRecording(bounds, settings);
 
-    if (selectorWindow) {
-      selectorWindow.close();
-    }
+    // 不关闭选择器窗口，让它显示录制边框
+    // if (selectorWindow) {
+    //   selectorWindow.close();
+    // }
 
     // 开始录制时自动切换到简化模式
     if (!isCompactMode) {
@@ -312,6 +317,11 @@ ipcMain.handle('start-recording', async (event, bounds) => {
 ipcMain.handle('stop-recording', async () => {
   try {
     const result = recorder.stopRecording();
+
+    // 停止录制时关闭选择器窗口
+    if (selectorWindow) {
+      selectorWindow.close();
+    }
 
     // 停止录制时恢复正常模式
     if (isCompactMode) {
@@ -355,6 +365,10 @@ app.whenReady().then(async () => {
   recorder.onStatusChange = (status) => {
     if (mainWindow) {
       mainWindow.webContents.send('recording-status', status);
+    }
+    // 同时向选择器窗口发送状态
+    if (selectorWindow) {
+      selectorWindow.webContents.send('recording-status', status);
     }
   };
 

@@ -11,6 +11,8 @@ body {
   position: relative;
   width: 100vw;
   height: 100vh;
+  background: transparent;
+  -webkit-app-region: drag; /* 允许拖拽窗口 */
 }
 
 /* 渐变背景 */
@@ -29,7 +31,9 @@ body {
   flex-direction: column;
   height: 100vh;
   padding: 20px;
+  padding-top: 40px; /* 为macOS标题栏留出空间 */
   position: relative;
+  -webkit-app-region: no-drag; /* 容器内容可交互 */
 }
 
 main {
@@ -310,4 +314,9 @@ footer {
 /* 简化模式：调整按钮间距 */
 .container.compact-mode .btn:not(:last-child) {
   margin-bottom: 0;
+}
+
+/* 确保交互元素可点击 */
+button, select, input, a {
+  -webkit-app-region: no-drag;
 }
