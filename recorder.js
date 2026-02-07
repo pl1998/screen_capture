@@ -60,6 +60,8 @@ class ScreenRecorder {
     this.settings = null;
     this.bounds = null;
     this.recordingData = null;
+    this.ffmpegCommand = null; // 存储 FFmpeg 命令引用以便清理
+    this.ipcListeners = []; // 存储 IPC 监听器以便清理
   }
 
   async initialize() {
@@ -81,40 +83,57 @@ class ScreenRecorder {
   setupListeners() {
     const { ipcMain } = require('electron');
 
-    ipcMain.on('recording-started', (event, data) => {
+    // 存储监听器引用以便清理
+    const recordingStartedHandler = (event, data) => {
       this.isRecording = true;
       if (this.onStatusChange) {
         this.onStatusChange({ status: 'recording' });
       }
-    });
+    };
 
-    ipcMain.on('recording-paused', () => {
+    const recordingPausedHandler = () => {
       this.isPaused = true;
       if (this.onStatusChange) {
         this.onStatusChange({ status: 'paused' });
       }
-    });
+    };
 
-    ipcMain.on('recording-resumed', () => {
+    const recordingResumedHandler = () => {
       this.isPaused = false;
       if (this.onStatusChange) {
         this.onStatusChange({ status: 'recording' });
       }
-    });
+    };
 
-    ipcMain.on('recording-stopped', async (event, buffer) => {
+    const recordingStoppedHandler = async (event, buffer) => {
       this.isRecording = false;
       this.isPaused = false;
       await this.processRecording(buffer);
-    });
+    };
 
-    ipcMain.on('recording-error', (event, data) => {
+    const recordingErrorHandler = (event, data) => {
       console.error('Recording error:', data.error);
       this.cleanup();
       if (this.onStatusChange) {
         this.onStatusChange({ status: 'error', error: data.error });
       }
-    });
+    };
+
+    // 注册监听器
+    ipcMain.on('recording-started', recordingStartedHandler);
+    ipcMain.on('recording-paused', recordingPausedHandler);
+    ipcMain.on('recording-resumed', recordingResumedHandler);
+    ipcMain.on('recording-stopped', recordingStoppedHandler);
+    ipcMain.on('recording-error', recordingErrorHandler);
+
+    // 保存监听器引用以便清理
+    this.ipcListeners = [
+      { event: 'recording-started', handler: recordingStartedHandler },
+      { event: 'recording-paused', handler: recordingPausedHandler },
+      { event: 'recording-resumed', handler: recordingResumedHandler },
+      { event: 'recording-stopped', handler: recordingStoppedHandler },
+      { event: 'recording-error', handler: recordingErrorHandler }
+    ];
   }
 
   async startRecording(bounds, settings) {
@@ -222,7 +241,7 @@ class ScreenRecorder {
 
   convertToMP4(inputPath, outputPath, resolution, bounds) {
     return new Promise((resolve, reject) => {
-      const ffmpegCommand = ffmpeg(inputPath)
+      this.ffmpegCommand = ffmpeg(inputPath)
         .videoCodec('libx264')
         .audioCodec('aac')
         .fps(30)
@@ -242,13 +261,13 @@ class ScreenRecorder {
         const scaleFilter = `scale=${resolution.width}:${resolution.height}`;
 
         // 组合滤镜
-        ffmpegCommand.videoFilters([cropFilter, scaleFilter]);
+        this.ffmpegCommand.videoFilters([cropFilter, scaleFilter]);
       } else {
         // 如果没有选中区域，只缩放
-        ffmpegCommand.size(`${resolution.width}x${resolution.height}`);
+        this.ffmpegCommand.size(`${resolution.width}x${resolution.height}`);
       }
 
-      ffmpegCommand
+      this.ffmpegCommand
         .on('start', (cmd) => {
           console.log('FFmpeg command:', cmd);
         })
@@ -262,10 +281,12 @@ class ScreenRecorder {
         })
         .on('end', () => {
           console.log('Conversion completed');
+          this.ffmpegCommand = null; // 清除引用
           resolve();
         })
         .on('error', (err) => {
           console.error('FFmpeg error:', err);
+          this.ffmpegCommand = null; // 清除引用
           reject(err);
         })
         .save(outputPath);
@@ -285,13 +306,55 @@ class ScreenRecorder {
     this.isRecording = false;
     this.isPaused = false;
     this.bounds = null;
+
+    // 终止正在运行的 FFmpeg 进程
+    if (this.ffmpegCommand) {
+      try {
+        this.ffmpegCommand.kill('SIGKILL');
+        console.log('FFmpeg process killed');
+      } catch (err) {
+        console.error('Error killing FFmpeg process:', err);
+      }
+      this.ffmpegCommand = null;
+    }
   }
 
   destroy() {
-    if (this.recordingWindow) {
+    console.log('Destroying ScreenRecorder...');
+
+    // 停止正在进行的录制
+    if (this.isRecording) {
+      this.stopRecording();
+    }
+
+    // 清理资源
+    this.cleanup();
+
+    // 移除所有 IPC 监听器
+    if (this.ipcListeners && this.ipcListeners.length > 0) {
+      const { ipcMain } = require('electron');
+      this.ipcListeners.forEach(({ event, handler }) => {
+        ipcMain.removeListener(event, handler);
+      });
+      this.ipcListeners = [];
+      console.log('IPC listeners removed');
+    }
+
+    // 关闭录制窗口
+    if (this.recordingWindow && !this.recordingWindow.isDestroyed()) {
+      // 通知录制窗口停止所有流
+      try {
+        this.recordingWindow.webContents.send('cleanup-streams');
+      } catch (err) {
+        console.error('Error sending cleanup signal:', err);
+      }
+
       this.recordingWindow.close();
       this.recordingWindow = null;
+      console.log('Recording window closed');
     }
+
+    console.log('ScreenRecorder destroyed');
   }
 
   getStatus() {

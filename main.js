@@ -395,6 +395,42 @@ app.on('window-all-closed', () => {
   }
 });
 
+// 应用退出前确保清理所有资源
+app.on('before-quit', (event) => {
+  console.log('App is quitting, cleaning up...');
+
+  // 如果录制器存在，确保清理
+  if (recorder) {
+    recorder.destroy();
+  }
+
+  // 关闭所有窗口
+  if (selectorWindow && !selectorWindow.isDestroyed()) {
+    selectorWindow.destroy();
+  }
+
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.destroy();
+  }
+
+  console.log('Cleanup completed');
+});
+
+// 最后的清理机会
+app.on('will-quit', () => {
+  console.log('App will quit, final cleanup...');
+
+  // 确保录制器被销毁
+  if (recorder) {
+    try {
+      recorder.destroy();
+    } catch (err) {
+      console.error('Error in final cleanup:', err);
+    }
+    recorder = null;
+  }
+});
+
 // Listen for theme changes
 nativeTheme.on('updated', () => {
   if (mainWindow) {
