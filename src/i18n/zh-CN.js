@@ -16,7 +16,7 @@ const zhCN = {
 
   // 按钮
   buttons: {
-    selectArea: '选择区域',
+    selectArea: '选择',
     start: '开始',
     pause: '暂停',
     resume: '恢复',
@@ -57,6 +57,19 @@ const zhCN = {
     recordingSaved: '录制已保存到:\n{path}',
     recordingError: '录制错误: {error}',
     unknownError: '未知错误'
+  },
+
+  // 菜单
+  menu: {
+    file: '文件',
+    selectArea: '选择区域',
+    openOutputFolder: '打开输出文件夹',
+    view: '视图',
+    compactMode: '简化模式',
+    language: '语言',
+    window: '窗口',
+    minimize: '最小化',
+    close: '关闭'
   }
 };
 

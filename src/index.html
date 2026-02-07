@@ -12,6 +12,60 @@
 </head>
 <body>
   <div class="gradient-bg"></div>
+
+  <!-- 自定义菜单栏 -->
+  <div class="custom-menubar" id="customMenubar">
+    <div class="menubar-item" data-menu="file">
+      <span data-i18n="menu.file">文件</span>
+      <div class="menu-dropdown">
+        <div class="menu-item" data-action="select-area">
+          <span data-i18n="menu.selectArea">选择区域</span>
+          <span class="menu-shortcut">Ctrl+S</span>
+        </div>
+        <div class="menu-separator"></div>
+        <div class="menu-item" data-action="open-output">
+          <span data-i18n="menu.openOutputFolder">打开输出文件夹</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="menubar-item" data-menu="view">
+      <span data-i18n="menu.view">视图</span>
+      <div class="menu-dropdown">
+        <div class="menu-item menu-checkbox" data-action="toggle-compact" id="menuCompactMode">
+          <span class="menu-check">✓</span>
+          <span data-i18n="menu.compactMode">简化模式</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="menubar-item" data-menu="language">
+      <span data-i18n="menu.language">语言</span>
+      <div class="menu-dropdown">
+        <div class="menu-item menu-radio" data-action="lang-zh" data-lang="zh-CN">
+          <span class="menu-radio-dot">●</span>
+          <span>简体中文</span>
+        </div>
+        <div class="menu-item menu-radio" data-action="lang-en" data-lang="en-US">
+          <span class="menu-radio-dot">●</span>
+          <span>English</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="menubar-item" data-menu="window">
+      <span data-i18n="menu.window">窗口</span>
+      <div class="menu-dropdown">
+        <div class="menu-item" data-action="minimize">
+          <span data-i18n="menu.minimize">最小化</span>
+        </div>
+        <div class="menu-item" data-action="close">
+          <span data-i18n="menu.close">关闭</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="container" id="appContainer">
     <main>
       <!-- 录制状态卡片 -->
@@ -26,11 +80,8 @@
       <!-- 控制按钮 -->
       <div class="controls">
         <button class="btn btn-select" id="selectAreaBtn">
-          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2"/>
-            <path d="M9 3v18M15 3v18M3 9h18M3 15h18"/>
-          </svg>
-          <span data-i18n="buttons.selectArea">选择区域</span>
+          <svg t="1770433492862" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5549" width="24" height="24"><path d="M307.2 304h376v-40H307.2V208h-64v35.2H208v64h56v376H304V307.2h3.2zM761.6 340.8h-40v377.6h-3.2v3.2H342.4v40h376V816h64v-33.6H816v-64h-54.4z" fill="#ffffff" p-id="5550"></path></svg>
+          <span data-i18n="buttons.selectArea">选择</span>
         </button>
         <button class="btn btn-start" id="startBtn" disabled>
           <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">

@@ -74,6 +74,127 @@ function updatePauseButtonText() {
   }
 }
 
+// ========== 自定义菜单栏逻辑 ==========
+let activeMenu = null;
+
+// 初始化菜单栏
+function initCustomMenubar() {
+  const menubar = document.getElementById('customMenubar');
+  const menubarItems = menubar.querySelectorAll('.menubar-item');
+
+  // 菜单项点击事件
+  menubarItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isActive = item.classList.contains('active');
+
+      // 关闭所有菜单
+      closeAllMenus();
+
+      // 切换当前菜单
+      if (!isActive) {
+        item.classList.add('active');
+        activeMenu = item;
+      }
+    });
+  });
+
+  // 菜单项操作
+  const menuItems = menubar.querySelectorAll('.menu-item');
+  menuItems.forEach(item => {
+    item.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const action = item.dataset.action;
+
+      // 执行操作
+      await handleMenuAction(action, item);
+
+      // 关闭菜单
+      closeAllMenus();
+    });
+  });
+
+  // 点击其他地方关闭菜单
+  document.addEventListener('click', () => {
+    closeAllMenus();
+  });
+
+  // 更新菜单状态
+  updateMenuStates();
+}
+
+// 关闭所有菜单
+function closeAllMenus() {
+  document.querySelectorAll('.menubar-item').forEach(item => {
+    item.classList.remove('active');
+  });
+  activeMenu = null;
+}
+
+// 处理菜单操作
+async function handleMenuAction(action, menuItem) {
+  switch (action) {
+    case 'select-area':
+      selectAreaBtn.click();
+      break;
+
+    case 'open-output':
+      await window.electronAPI.menuOpenOutputFolder();
+      break;
+
+    case 'toggle-compact':
+      await window.electronAPI.menuToggleCompactMode();
+      break;
+
+    case 'lang-zh':
+      await window.electronAPI.menuChangeLanguage('zh-CN');
+      i18n.setLocale('zh-CN');
+      updateUIText();
+      updateMenuStates();
+      break;
+
+    case 'lang-en':
+      await window.electronAPI.menuChangeLanguage('en-US');
+      i18n.setLocale('en-US');
+      updateUIText();
+      updateMenuStates();
+      break;
+
+    case 'minimize':
+      await window.electronAPI.menuMinimizeWindow();
+      break;
+
+    case 'close':
+      await window.electronAPI.menuCloseWindow();
+      break;
+  }
+}
+
+// 更新菜单状态（选中状态）
+async function updateMenuStates() {
+  // 更新简化模式复选框
+  const compactMode = await window.electronAPI.getCompactMode();
+  const compactMenuItem = document.getElementById('menuCompactMode');
+  if (compactMenuItem) {
+    if (compactMode) {
+      compactMenuItem.classList.add('checked');
+    } else {
+      compactMenuItem.classList.remove('checked');
+    }
+  }
+
+  // 更新语言单选按钮
+  const currentLang = await window.electronAPI.getCurrentLanguage();
+  document.querySelectorAll('.menu-radio').forEach(item => {
+    const lang = item.dataset.lang;
+    if (lang === currentLang) {
+      item.classList.add('checked');
+    } else {
+      item.classList.remove('checked');
+    }
+  });
+}
+
 // Initialize
 async function init() {
   // Load settings
@@ -84,6 +205,9 @@ async function init() {
   const savedLanguage = settings.language || 'zh-CN';
   i18n.setLocale(savedLanguage);
   updateUIText();
+
+  // 初始化自定义菜单栏
+  initCustomMenubar();
 
   // Apply theme
   const theme = await window.electronAPI.getTheme();
@@ -123,9 +247,12 @@ async function init() {
   window.electronAPI.onCompactModeChanged((isCompact) => {
     if (isCompact) {
       appContainer.classList.add('compact-mode');
+      document.body.classList.add('compact-mode');
     } else {
       appContainer.classList.remove('compact-mode');
+      document.body.classList.remove('compact-mode');
     }
+    updateMenuStates();
   });
 
   // Listen for menu actions

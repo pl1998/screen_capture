@@ -1,3 +1,5 @@
+<img src="assets/icon.png" style="width:50px">
+
 # Screen Recorder
 
 A cross-platform desktop application for recording screen areas with high quality using Electron and FFmpeg.

@@ -33,6 +33,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Menu actions
   onMenuSelectArea: (callback) => ipcRenderer.on('menu-select-area', callback),
 
+  // Custom menu bar actions
+  menuToggleCompactMode: () => ipcRenderer.invoke('menu-toggle-compact-mode'),
+  menuChangeLanguage: (language) => ipcRenderer.invoke('menu-change-language', language),
+  menuOpenOutputFolder: () => ipcRenderer.invoke('menu-open-output-folder'),
+  menuMinimizeWindow: () => ipcRenderer.invoke('menu-minimize-window'),
+  menuCloseWindow: () => ipcRenderer.invoke('menu-close-window'),
+  getCurrentLanguage: () => ipcRenderer.invoke('get-current-language'),
+  getCompactMode: () => ipcRenderer.invoke('get-compact-mode'),
+
   // Recording status updates
   onRecordingStatus: (callback) => ipcRenderer.on('recording-status', (event, status) => callback(status))
 });

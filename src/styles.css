@@ -26,13 +26,116 @@ body {
   z-index: -1;
 }
 
+/* 自定义菜单栏 */
+.custom-menubar {
+  display: flex;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  padding: 0 8px;
+  height: 32px;
+  align-items: center;
+  gap: 4px;
+  -webkit-app-region: no-drag;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 9999; /* 确保菜单栏在最上层 */
+}
+
+.menubar-item {
+  position: relative;
+  padding: 4px 12px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  border-radius: 4px;
+  transition: background 0.2s;
+  user-select: none;
+}
+
+.menubar-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.menubar-item.active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.menu-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  min-width: 200px;
+  background: rgba(30, 30, 30, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  z-index: 10000; /* 确保下拉菜单在菜单栏之上 */
+}
+
+.menubar-item.active .menu-dropdown {
+  display: block;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+  gap: 8px;
+}
+
+.menu-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.menu-separator {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 4px 8px;
+}
+
+.menu-shortcut {
+  margin-left: auto;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+}
+
+.menu-checkbox .menu-check {
+  width: 16px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.menu-checkbox.checked .menu-check {
+  opacity: 1;
+}
+
+.menu-radio .menu-radio-dot {
+  width: 16px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.menu-radio.checked .menu-radio-dot {
+  opacity: 1;
+}
+
 .container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: calc(100vh - 32px); /* 减去菜单栏高度 */
   padding: 20px;
-  padding-top: 40px; /* 为macOS标题栏留出空间 */
+  padding-top: 20px; /* 移除macOS标题栏空间，因为有自定义菜单栏了 */
   position: relative;
+  z-index: 1; /* 设置较低的 z-index，确保不会覆盖菜单 */
   -webkit-app-region: no-drag; /* 容器内容可交互 */
 }
 
@@ -274,6 +377,15 @@ footer {
 /* 简化模式样式 */
 .container.compact-mode {
   padding: 12px 8px;
+}
+
+/* 简化模式：隐藏菜单栏 */
+body.compact-mode .custom-menubar {
+  display: none;
+}
+
+body.compact-mode .container {
+  height: 100vh; /* 简化模式下占满全屏 */
 }
 
 .container.compact-mode main {

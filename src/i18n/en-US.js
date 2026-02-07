@@ -57,6 +57,19 @@ const enUS = {
     recordingSaved: 'Recording saved to:\n{path}',
     recordingError: 'Recording error: {error}',
     unknownError: 'Unknown error'
+  },
+
+  // Menu
+  menu: {
+    file: 'File',
+    selectArea: 'Select Area',
+    openOutputFolder: 'Open Output Folder',
+    view: 'View',
+    compactMode: 'Compact Mode',
+    language: 'Language',
+    window: 'Window',
+    minimize: 'Minimize',
+    close: 'Close'
   }
 };
 

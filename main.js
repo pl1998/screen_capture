@@ -9,6 +9,7 @@ let selectorWindow;
 let recorder;
 let currentLanguage = 'zh-CN';
 let isCompactMode = false;
+let isChangingLanguage = false; // 防止并发语言切换
 
 // Store user settings
 const settingsPath = path.join(app.getPath('userData'), 'settings.json');
@@ -97,6 +98,12 @@ function createSelectorWindow() {
 // 创建应用菜单
 function createMenu() {
   const t = menuI18n[currentLanguage];
+  console.log('Creating menu with language:', currentLanguage);
+  console.log('Menu translations sample:', {
+    fileLabel: t.file.label,
+    viewLabel: t.view.label,
+    languageLabel: t.language.label
+  });
   const isMac = process.platform === 'darwin';
 
   const template = [
@@ -203,35 +210,62 @@ function createMenu() {
 
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
+  console.log('Menu set successfully with language:', currentLanguage);
 }
 
 // 切换语言
 function changeLanguage(language) {
+  // 防止并发调用
+  if (isChangingLanguage) {
+    console.log('Language change already in progress, ignoring');
+    return;
+  }
+
+  // 如果已经是目标语言，直接返回
+  if (currentLanguage === language) {
+    console.log('Already in language:', language);
+    return;
+  }
+
+  isChangingLanguage = true;
+  console.log('Changing language from', currentLanguage, 'to', language);
+
   currentLanguage = language;
 
   // 保存语言设置
   const settings = loadSettings();
   settings.language = language;
   saveSettings(settings);
+  console.log('Language settings saved');
 
-  // 重新创建菜单（不需要先设置为 null）
-  createMenu();
+  // 不再需要重建原生菜单，因为使用自定义菜单栏
+  // createMenu();
 
   // 通知渲染进程更新语言
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send('language-changed', language);
+    console.log('Language change notification sent to renderer');
   }
+
+  // 短暂延迟后重置锁
+  setTimeout(() => {
+    isChangingLanguage = false;
+  }, 50);
 }
 
 // 切换简化模式
 function toggleCompactMode() {
   isCompactMode = !isCompactMode;
+  console.log('Toggling compact mode to:', isCompactMode);
 
-  // 重新创建菜单以更新复选框状态
-  createMenu();
+  // 不再需要重建原生菜单，因为使用自定义菜单栏
+  // createMenu();
 
   // 调整窗口大小
   if (mainWindow && !mainWindow.isDestroyed()) {
+    // 临时启用窗口大小调整以确保 setSize 生效
+    mainWindow.setResizable(true);
+
     if (isCompactMode) {
       // 简化模式：窄窗口
       mainWindow.setSize(120, 680);
@@ -239,6 +273,9 @@ function toggleCompactMode() {
       // 正常模式：标准窗口
       mainWindow.setSize(420, 680);
     }
+
+    // 恢复禁用窗口大小调整
+    mainWindow.setResizable(false);
 
     // 通知渲染进程切换模式
     mainWindow.webContents.send('compact-mode-changed', isCompactMode);
@@ -268,6 +305,41 @@ ipcMain.handle('select-directory', async () => {
 
 ipcMain.handle('open-selector', () => {
   createSelectorWindow();
+});
+
+// 自定义菜单栏的 IPC 处理器
+ipcMain.handle('menu-toggle-compact-mode', () => {
+  toggleCompactMode();
+});
+
+ipcMain.handle('menu-change-language', (event, language) => {
+  changeLanguage(language);
+});
+
+ipcMain.handle('menu-open-output-folder', async () => {
+  const settings = loadSettings();
+  const outputPath = settings.outputPath || app.getPath('videos');
+  shell.openPath(outputPath);
+});
+
+ipcMain.handle('menu-minimize-window', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.minimize();
+  }
+});
+
+ipcMain.handle('menu-close-window', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.close();
+  }
+});
+
+ipcMain.handle('get-current-language', () => {
+  return currentLanguage;
+});
+
+ipcMain.handle('get-compact-mode', () => {
+  return isCompactMode;
 });
 
 ipcMain.handle('close-selector', () => {
@@ -359,8 +431,8 @@ app.whenReady().then(async () => {
   const settings = loadSettings();
   currentLanguage = settings.language || 'zh-CN';
 
-  // 创建菜单
-  createMenu();
+  // 隐藏原生菜单（使用自定义菜单栏）
+  Menu.setApplicationMenu(null);
 
   // Initialize recorder
   recorder = new ScreenRecorder();
